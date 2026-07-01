@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -6,13 +5,11 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Database Manager</title>
 
-<link rel="stylesheet"
-href="style.css">
+<link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -20,48 +17,95 @@ href="style.css">
 
 <div class="container">
 
-<h1>Database Manager</h1>
+<div class="sidebar">
 
+<h2>Database Manager</h2>
 
-<div class="card">
-
-<h2>Create Database</h2>
-
-<input
-id="dbname"
-placeholder="Database name">
-
-<button
-onclick="createDB()">
-
-Create
-
+<button onclick="createDatabasePrompt()">
++ Database
 </button>
+
+<ul id="dbList"></ul>
 
 </div>
 
 
-<div class="card">
+<div class="main">
 
-<h2>Databases</h2>
+<div class="topbar">
 
-<button id="refreshBtn">
+<h1 id="currentDB">
+
+Select Database
+
+</h1>
+
+<button onclick="loadDatabases()">
+
 Refresh
+
 </button>
 
-<ul id="databases">
+</div>
 
-</ul>
+
+<div class="tables-header">
+
+<h2>Tables</h2>
+
+<button onclick="createTablePrompt()">
+
++ Table
+
+</button>
+
+</div>
+
+
+<div id="tables">
+
+</div>
+
+
+<div class="records-header">
+
+<h2>
+
+Rows
+
+</h2>
+
+<button onclick="insertRowPrompt()">
+
++ Row
+
+</button>
+
+</div>
+
+
+<div class="table-container">
+
+<table id="records">
+
+<thead>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
 
 </div>
 
 </div>
 
-<script src="script.js">
+</div>
 
-</script>
+<script src="script.js"></script>
 
 </body>
 
 </html>
-
