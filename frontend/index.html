@@ -2,81 +2,74 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Database Manager Pro</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB Manager Pro</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="app">
+<div class="layout">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
 
-<h2>DB Manager</h2>
+<div class="logo">DB Manager</div>
 
-<button class="btn primary" onclick="openDbModal()">
-+ New Database
+<button class="btn primary" onclick="openModal('db')">
++ Database
 </button>
 
-<ul id="dbList"></ul>
+<div id="dbList" class="list"></div>
 
 </aside>
 
 <!-- MAIN -->
 <main class="main">
 
-<header class="topbar">
-
-<h1 id="currentDB">No Database Selected</h1>
-
-<div>
-<button class="btn" onclick="loadDatabases()">Refresh</button>
-</div>
-
+<header>
+<h1 id="title">Select Database</h1>
 </header>
 
-<!-- CARDS -->
-<section class="cards">
+<!-- STATS -->
+<div class="stats">
 
 <div class="card">
-<h3>Databases</h3>
-<p id="dbCount">0</p>
+<span>Databases</span>
+<h2 id="dbCount">0</h2>
 </div>
 
 <div class="card">
-<h3>Tables</h3>
-<p id="tableCount">0</p>
+<span>Tables</span>
+<h2 id="tableCount">0</h2>
 </div>
 
 <div class="card">
-<h3>Rows</h3>
-<p id="rowCount">0</p>
+<span>Rows</span>
+<h2 id="rowCount">0</h2>
 </div>
 
-</section>
+</div>
 
 <!-- TABLES -->
-<section class="panel">
+<section class="section">
 
-<div class="panel-header">
-<h2>Tables</h2>
-<button class="btn primary" onclick="openTableModal()">+ Table</button>
+<div class="section-header">
+<h3>Tables</h3>
+<button class="btn" onclick="openModal('table')">+ Table</button>
 </div>
 
-<div id="tables"></div>
+<div id="tables" class="grid"></div>
 
 </section>
 
 <!-- ROWS -->
-<section class="panel">
+<section class="section">
 
-<div class="panel-header">
-<h2>Rows</h2>
-<button class="btn primary" onclick="openRowModal()">+ Row</button>
+<div class="section-header">
+<h3>Rows</h3>
+<button class="btn" onclick="openModal('row')">+ Row</button>
 </div>
 
 <table>
@@ -90,26 +83,28 @@
 
 </div>
 
-<!-- MODALS -->
-
+<!-- MODAL -->
 <div id="modal" class="modal hidden">
-<div class="modal-content">
+
+<div class="modal-box">
 
 <h3 id="modalTitle"></h3>
 
 <div id="modalBody"></div>
 
-<div class="modal-actions">
+<div class="actions">
 <button class="btn" onclick="closeModal()">Cancel</button>
-<button class="btn primary" onclick="confirmModal()">Confirm</button>
+<button class="btn primary" onclick="confirmModal()">Save</button>
 </div>
 
 </div>
+
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
