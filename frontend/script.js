@@ -1,108 +1,68 @@
 const API = "http://127.0.0.1:8001";
 
-console.log("JS Loaded");
-
-window.onload = function () {
+window.onload = () => {
     loadDBs();
 };
 
 async function createDB() {
 
-    const name = document.getElementById("dbname").value.trim();
+    const name = document.getElementById("dbname").value;
 
-    if (name === "") {
-
+    if (!name) {
         alert("Enter database name");
-
         return;
-
     }
 
-    try {
+    const response = await fetch(`${API}/databases/`, {
 
-        const response = await fetch(
+        method: "POST",
 
-            `${API}/databases/`,
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-            {
+        body: JSON.stringify({
+            name: name
+        })
 
-                method: "POST",
+    });
 
-                headers: {
+    const data = await response.json();
 
-                    "Content-Type": "application/json"
+    alert(data.message);
 
-                },
+    document.getElementById("dbname").value = "";
 
-                body: JSON.stringify({
-
-                    name: name
-
-                })
-
-            }
-
-        );
-
-        const data = await response.json();
-
-        alert(data.message);
-
-        document.getElementById("dbname").value = "";
-
-        loadDBs();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        alert("Cannot connect to API");
-
-    }
+    await loadDBs();
 
 }
 
+
 async function loadDBs() {
 
-    try {
+    const response = await fetch(
 
-        const response = await fetch(
+        `${API}/databases/`
 
-            `${API}/databases/`
+    );
 
-        );
+    const data = await response.json();
 
-        const data = await response.json();
+    const list = document.getElementById(
 
-        const list = document.getElementById(
+        "databases"
 
-            "databases"
+    );
 
-        );
+    list.innerHTML = "";
 
-        list.innerHTML = "";
+    for (let db of data) {
 
-        data.forEach(db => {
+        const li = document.createElement("li");
 
-            list.innerHTML += `
+        li.textContent = db;
 
-            <li>
-
-                ${db}
-
-            </li>
-
-            `;
-
-        });
-
-    }
-
-    catch (error) {
-
-        console.error(error);
+        list.appendChild(li);
 
     }
 
