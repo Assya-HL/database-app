@@ -4,26 +4,39 @@ Application de gestion de bases de données avec FastAPI.
 
 ## Concept
 
-Database = Dossier
-
-Table = Fichier CSV
-
-Colonnes = Header CSV
+* Database = Dossier
+* Table = Fichier CSV
+* Colonnes = Header CSV
 
 ## Fonctionnalités
 
-- Create Database
-- List Databases
-- Delete Database
+* Créer une base de données
 
-- Create Table
-- List Tables
-- Delete Table
+* Lister les bases de données
 
-- Insert Row
-- Read Rows
-- Update Row
-- Delete Row
+* Supprimer une base de données
+
+* Créer une table
+
+* Lister les tables
+
+* Supprimer une table
+
+* Insérer une ligne
+
+* Lire les lignes
+
+* Modifier une ligne
+
+* Supprimer une ligne
+
+## Stockage
+
+* Les bases de données sont stockées dans le dossier `database/`
+* Chaque base de données est représentée par un dossier
+* Chaque table est représentée par un fichier CSV
+* Les colonnes sont stockées dans la première ligne du fichier CSV
+* Les modifications sont synchronisées avec GitHub après chaque opération
 
 ## Exécution
 
@@ -31,6 +44,8 @@ Colonnes = Header CSV
 python -m uvicorn main:app --reload
 ```
 
-Swagger :
+## Swagger
 
+```text
 http://127.0.0.1:8001/docs
+```
