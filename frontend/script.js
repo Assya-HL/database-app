@@ -18,7 +18,7 @@ async function fetchDatabases() {
         container.innerHTML = "";
 
         if (!Array.isArray(dbs) || dbs.length === 0) {
-            container.innerHTML = "Aucune base de données trouvée.";
+            container.innerHTML = "<div class='empty-msg'>Aucune base de données</div>";
             return;
         }
 
@@ -27,13 +27,13 @@ async function fetchDatabases() {
             const div = document.createElement("div");
             div.className = `db-item ${isActive ? 'active' : ''}`;
             div.innerHTML = `
-                <span style="cursor:pointer;" onclick="selectDatabase('${dbName}')">📁 <b>${dbName}</b></span>
-                <button onclick="deleteDatabase('${dbName}')" style="color:red;">Supprimer</button>
+                <span style="flex:1;" onclick="selectDatabase('${dbName}')">📁 ${dbName}</span>
+                <span onclick="deleteDatabase('${dbName}')" style="color:var(--rose); font-size:12px; cursor:pointer;">Supprimer</span>
             `;
             container.appendChild(div);
         });
     } catch (err) {
-        document.getElementById("db-list").innerHTML = "<b style='color:red;'>Erreur de connexion avec FastAPI (Vérifie le port 8001)</b>";
+        document.getElementById("db-list").innerHTML = "<b style='color:var(--rose); font-size:12px;'>Erreur API FastAPI</b>";
     }
 }
 
@@ -83,7 +83,7 @@ async function fetchTables() {
         container.innerHTML = "";
 
         if (!Array.isArray(tables) || tables.length === 0) {
-            container.innerHTML = "Aucune table CSV disponible.";
+            container.innerHTML = "<div class='empty-msg'>Aucune table CSV</div>";
             return;
         }
 
@@ -92,8 +92,8 @@ async function fetchTables() {
             const div = document.createElement("div");
             div.className = `table-item ${isActive ? 'active' : ''}`;
             div.innerHTML = `
-                <span style="cursor:pointer;" onclick="selectTable('${tableName}')">📄 ${tableName}.csv</span>
-                <button onclick="deleteTable('${tableName}')" style="color:red;">Supprimer</button>
+                <span style="flex:1;" onclick="selectTable('${tableName}')">📄 ${tableName}.csv</span>
+                <span onclick="deleteTable('${tableName}')" style="color:var(--rose); font-size:12px; cursor:pointer;">Supprimer</span>
             `;
             container.appendChild(div);
         });
@@ -127,7 +127,7 @@ async function deleteTable(tableName) {
         await fetch(`${API_BASE}/databases/${currentDB}/tables/${tableName}`, { method: 'DELETE' });
         if (currentTable === tableName) {
             currentTable = "";
-            document.getElementById("data-table").style.display = "none";
+            document.getElementById("active-table-title").innerText = "Sélectionnez une table CSV";
         }
         fetchTables();
     } catch (err) { alert("Erreur."); }
@@ -137,7 +137,6 @@ async function deleteTable(tableName) {
 function selectTable(tableName) {
     currentTable = tableName;
     document.getElementById("active-table-title").innerText = `${tableName}.csv`;
-    document.getElementById("data-table").style.display = "table";
     fetchTables();
     fetchRows();
 }
@@ -154,7 +153,8 @@ async function fetchRows() {
         tbody.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
-            thead.innerHTML = "<th>Table vide ou pas de colonne id</th>";
+            thead.innerHTML = "<th>Table vide. Ajoutez une ligne.</th>";
+            tbody.innerHTML = `<tr><td style="text-align:center; color:var(--text-muted);">Pas encore de lignes</td></tr>`;
             return;
         }
 
@@ -178,14 +178,14 @@ async function fetchRows() {
     } catch (err) { console.error(err); }
 }
 
-// 10. Add Row Prompt simple
+// 10. Add Row
 async function openAddRowModal() {
-    if (!currentTable || currentHeaders.length === 0) return alert("Sélectionnez une table valide.");
+    if (!currentTable || currentHeaders.length === 0) return alert("Sélectionnez une table d'abord !");
     const payload = {};
     
     for (let h of currentHeaders) {
-        const val = prompt(`Entrez la valeur pour la colonne [ ${h} ] :`);
-        if (val === null) return; // annuler
+        const val = prompt(`Entrez la valeur pour [ ${h} ] :`);
+        if (val === null) return;
         payload[h] = val;
     }
 

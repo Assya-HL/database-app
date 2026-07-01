@@ -2,51 +2,83 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>FlatDB Simple Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlatDB Studio — Professional</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
-    <h2>📁 FlatDB Studio — Test Minimal</h2>
-    <hr>
+    <header class="main-header">
+        <div class="logo-area">
+            <div class="icon-box">📁</div>
+            <div>
+                <h1>FlatDB Studio</h1>
+                <p class="status"><span class="pulse-dot"></span> FastAPI Backend Active (Port 8001)</p>
+            </div>
+        </div>
+    </header>
 
-    <h3>1. Les Bases de Données</h3>
-    <div style="margin-bottom: 15px;">
-        <input type="text" id="new-db-name" placeholder="Nom de la DB (ex: ecom_db)">
-        <button onclick="createDatabase()">+ Créer la DB</button>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="section">
+                <div class="section-header">
+                    <span>Bases de Données</span>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="new-db-name" placeholder="Nom de la DB...">
+                    <button onclick="createDatabase()" class="btn-add">+</button>
+                </div>
+                <div id="db-list" class="list-container">
+                    </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <span>Tables (<span id="current-db-name" style="color:var(--primary-hover);">Aucune</span>)</span>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="new-table-name" placeholder="Table...">
+                    <input type="text" id="new-table-columns" placeholder="id,name,col...">
+                    <button onclick="createTable()" class="btn-add">+</button>
+                </div>
+                <div id="table-list" class="list-container">
+                    <div class="empty-msg">Sélectionnez une DB</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="table-card">
+                <div class="table-header-meta">
+                    <div>
+                        <h2 id="active-table-title">Sélectionnez une table CSV</h2>
+                        <p class="sub-text">Visualisation en temps réel</p>
+                    </div>
+                    <button onclick="openAddRowModal()" class="btn-primary">+ Ajouter une ligne</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="data-table" class="professional-table">
+                        <thead>
+                            <tr id="table-headers"></tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="100%" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                    Aucune donnée à afficher pour le moment.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
-    
-    <div id="db-list" style="border: 1px solid #ccc; padding: 10px; background: #eee;">
-        Chargement des bases...
-    </div>
 
-    <hr>
-
-    <h3>2. Les Tables dans la DB active: <span id="current-db-name" style="color: blue;">Aucune</span></h3>
-    <div style="margin-bottom: 15px;">
-        <input type="text" id="new-table-name" placeholder="Nom de la table (ex: users)">
-        <input type="text" id="new-table-columns" placeholder="Colonnes (ex: id,name,email)">
-        <button onclick="createTable()">+ Créer la Table</button>
-    </div>
-
-    <div id="table-list" style="border: 1px solid #ccc; padding: 10px; background: #eee;">
-        Sélectionnez d'abord une base de données.
-    </div>
-
-    <hr>
-
-    <h3>3. Données de la table: <span id="active-table-title" style="color: green;">Aucune</span></h3>
-    <div style="margin-bottom: 15px;">
-        <button onclick="openAddRowModal()">+ Ajouter une ligne</button>
-    </div>
-
-    <table border="1" cellpadding="5" id="data-table" style="width: 100%; border-collapse: collapse; display: none;">
-        <thead>
-            <tr id="table-headers"></tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-    </table>
-
+    <script>
+        setTimeout(() => { lucide.createIcons(); }, 500);
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
