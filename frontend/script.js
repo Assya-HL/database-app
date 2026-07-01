@@ -27,55 +27,62 @@ const cancelBtn = document.getElementById("cancelBtn");
 let modalAction = null;
 
 
-/***************************
-LOADER
-****************************/
-
 function showLoader(){
 
-loader.style.display = "flex";
+loader.style.display="flex";
 
 }
 
 function hideLoader(){
 
-loader.style.display = "none";
+loader.style.display="none";
 
 }
 
 
-/***************************
-TOAST
-****************************/
-
 function toast(msg){
 
-const container = document.getElementById("toastContainer");
+const container =
+document.getElementById(
+"toastContainer"
+);
 
-const div = document.createElement("div");
+const div =
+document.createElement(
+"div"
+);
 
-div.className = "toast";
+div.className="toast";
 
-div.innerText = msg;
+div.innerText=msg;
 
 container.appendChild(div);
 
 setTimeout(()=>{
 
-div.remove()
+div.remove();
 
 },3000);
 
 }
 
 
-/***************************
-MODAL
-****************************/
 
-function openModal(title, html, callback){
+function openModal(
 
-modal.classList.remove("hidden");
+title,
+
+html,
+
+callback
+
+){
+
+modal.classList.remove(
+
+"hidden"
+
+);
 
 modalTitle.innerText = title;
 
@@ -85,17 +92,24 @@ modalAction = callback;
 
 }
 
+
+
 function closeModal(){
 
-modal.classList.add("hidden");
+modal.classList.add(
+
+"hidden"
+
+);
 
 }
 
-closeModalBtn.onclick = closeModal;
 
-cancelBtn.onclick = closeModal;
+closeModalBtn.onclick=closeModal;
 
-saveBtn.onclick = ()=>{
+cancelBtn.onclick=closeModal;
+
+saveBtn.onclick=()=>{
 
 if(modalAction){
 
@@ -104,13 +118,6 @@ modalAction();
 }
 
 };
-
-
-
-/***************************
-DATABASES
-****************************/
-
 async function loadDatabases(){
 
 showLoader();
@@ -123,25 +130,41 @@ const res = await fetch(
 
 const data = await res.json();
 
-databaseList.innerHTML = "";
+databaseList.innerHTML="";
 
-dbCount.innerText = data.length;
+dbCount.innerText=data.length;
 
 data.forEach(db=>{
 
-const card = document.createElement("div");
+const card = document.createElement(
 
-card.className = "grid-item";
+"div"
 
-card.innerHTML = `
+);
+
+card.className="grid-item";
+
+card.innerHTML=`
 
 <h4>${db}</h4>
 
 <p>Database</p>
 
+<button
+
+class="btn"
+
+onclick="event.stopPropagation(); deleteDatabase('${db}')"
+
+>
+
+Delete
+
+</button>
+
 `;
 
-card.onclick = ()=>{
+card.onclick=()=>{
 
 selectDatabase(db)
 
@@ -155,14 +178,6 @@ hideLoader();
 
 }
 
-
-async function selectDatabase(db){
-
-currentDB = db;
-
-await loadTables();
-
-}
 
 
 async function createDatabase(name){
@@ -191,7 +206,11 @@ name:name
 
 );
 
-toast("Database Created");
+toast(
+
+"Database Created"
+
+);
 
 loadDatabases();
 
@@ -199,13 +218,44 @@ loadDatabases();
 
 
 
-/***************************
-TABLES
-****************************/
+async function deleteDatabase(db){
 
+await fetch(
+
+`${API}/databases/${db}`,
+
+{
+
+method:"DELETE"
+
+}
+
+);
+
+toast(
+
+"Database Deleted"
+
+);
+
+loadDatabases();
+
+}
+
+
+
+async function selectDatabase(db){
+
+currentDB = db;
+
+loadTables();
+
+}
 async function loadTables(){
 
-if(!currentDB) return;
+if(!currentDB)
+
+return;
 
 const res = await fetch(
 
@@ -215,25 +265,41 @@ const res = await fetch(
 
 const data = await res.json();
 
-tableList.innerHTML = "";
+tableList.innerHTML="";
 
-tableCount.innerText = data.length;
+tableCount.innerText=data.length;
 
 data.forEach(table=>{
 
-const div = document.createElement("div");
+const div=document.createElement(
 
-div.className = "grid-item";
+"div"
 
-div.innerHTML = `
+);
+
+div.className="grid-item";
+
+div.innerHTML=`
 
 <h4>${table}</h4>
 
 <p>CSV Table</p>
 
+<button
+
+class="btn"
+
+onclick="event.stopPropagation(); deleteTable('${table}')"
+
+>
+
+Delete
+
+</button>
+
 `;
 
-div.onclick = ()=>{
+div.onclick=()=>{
 
 selectTable(table)
 
@@ -245,14 +311,6 @@ tableList.appendChild(div);
 
 }
 
-
-async function selectTable(table){
-
-currentTable = table;
-
-loadRows();
-
-}
 
 
 async function createTable(
@@ -279,9 +337,9 @@ headers:{
 
 body:JSON.stringify({
 
-table:table,
+table,
 
-columns:columns
+columns
 
 })
 
@@ -289,7 +347,11 @@ columns:columns
 
 );
 
-toast("Table Created");
+toast(
+
+"Table Created"
+
+);
 
 loadTables();
 
@@ -297,13 +359,44 @@ loadTables();
 
 
 
-/***************************
-ROWS
-****************************/
+async function deleteTable(table){
 
+await fetch(
+
+`${API}/databases/${currentDB}/tables/${table}`,
+
+{
+
+method:"DELETE"
+
+}
+
+);
+
+toast(
+
+"Table Deleted"
+
+);
+
+loadTables();
+
+}
+
+
+
+async function selectTable(table){
+
+currentTable = table;
+
+loadRows();
+
+}
 async function loadRows(){
 
-if(!currentTable) return;
+if(!currentTable)
+
+return;
 
 const res = await fetch(
 
@@ -322,42 +415,45 @@ renderRows(rows);
 }
 
 
+
 function renderRows(rows){
 
-tableHead.innerHTML = "";
+tableHead.innerHTML="";
 
-tableBody.innerHTML = "";
+tableBody.innerHTML="";
 
-if(rows.length===0){
+if(rows.length===0)
 
 return;
 
-}
+const cols = Object.keys(
 
-const cols = Object.keys(rows[0]);
+rows[0]
 
-let th = "<tr>";
+);
+
+let th="<tr>";
 
 cols.forEach(c=>{
 
-th += `<th>${c}</th>`;
+th+=`<th>${c}</th>`;
 
 });
 
-th += "<th>Actions</th>";
+th+="<th>Actions</th>";
 
-th += "</tr>";
+th+="</tr>";
 
-tableHead.innerHTML = th;
+tableHead.innerHTML=th;
 
 
 rows.forEach(row=>{
 
-let tr = "<tr>";
+let tr="<tr>";
 
 cols.forEach(c=>{
 
-tr += `
+tr+=`
 
 <td>
 
@@ -369,17 +465,25 @@ ${row[c]}
 
 });
 
-tr += `
+tr+=`
 
 <td>
 
-<button onclick="editRow('${row.id}')">
+<button
+
+onclick="editRow('${row.id}')"
+
+>
 
 Edit
 
 </button>
 
-<button onclick="deleteRow('${row.id}')">
+<button
+
+onclick="deleteRow('${row.id}')"
+
+>
 
 Delete
 
@@ -389,20 +493,13 @@ Delete
 
 `;
 
-tr += "</tr>";
+tr+="</tr>";
 
-tableBody.innerHTML += tr;
+tableBody.innerHTML+=tr;
 
 });
 
 }
-
-
-
-/***************************
-ADD ROW
-****************************/
-
 async function addRow(data){
 
 await fetch(
@@ -425,17 +522,17 @@ body:JSON.stringify(data)
 
 );
 
-toast("Row Added");
+toast(
+
+"Row Added"
+
+);
 
 loadRows();
 
 }
 
 
-
-/***************************
-UPDATE
-****************************/
 
 async function updateRow(
 
@@ -467,7 +564,7 @@ body:JSON.stringify(data)
 
 toast(
 
-"Row Updated"
+"Updated"
 
 );
 
@@ -476,10 +573,6 @@ loadRows();
 }
 
 
-
-/***************************
-DELETE
-****************************/
 
 async function deleteRow(id){
 
@@ -516,64 +609,6 @@ toast(
 loadRows();
 
 }
-
-
-async function deleteTable(table){
-
-await fetch(
-
-`${API}/databases/${currentDB}/tables/${table}`,
-
-{
-
-method:"DELETE"
-
-}
-
-);
-
-toast(
-
-"Table Deleted"
-
-);
-
-loadTables();
-
-}
-
-
-
-async function deleteDatabase(db){
-
-await fetch(
-
-`${API}/databases/${db}`,
-
-{
-
-method:"DELETE"
-
-}
-
-);
-
-toast(
-
-"Database Deleted"
-
-);
-
-loadDatabases();
-
-}
-
-
-
-/***************************
-BUTTONS
-****************************/
-
 document.getElementById(
 
 "refreshBtn"
@@ -598,7 +633,13 @@ openModal(
 
 `
 
-<input id="dbName">
+<input
+
+id="dbName"
+
+placeholder="Database Name"
+
+>
 
 `,
 
@@ -624,9 +665,321 @@ closeModal();
 
 
 
-/***************************
-INIT
-****************************/
+document.getElementById(
+
+"addTable"
+
+).onclick=()=>{
+
+if(!currentDB){
+
+toast(
+
+"Select Database"
+
+);
+
+return;
+
+}
+
+openModal(
+
+"Create Table",
+
+`
+
+<input
+
+id="tableName"
+
+placeholder="Table"
+
+>
+
+<input
+
+id="columns"
+
+placeholder="id,name,email"
+
+>
+
+`,
+
+()=>{
+
+const table=
+
+document.getElementById(
+
+"tableName"
+
+).value;
+
+const cols=
+
+document.getElementById(
+
+"columns"
+
+)
+
+.value
+
+.split(",");
+
+createTable(
+
+table,
+
+cols
+
+);
+
+closeModal();
+
+}
+
+);
+
+};
+
+
+
+document.getElementById(
+
+"addRow"
+
+).onclick=()=>{
+
+if(!currentTable){
+
+toast(
+
+"Select Table"
+
+);
+
+return;
+
+}
+
+let html="";
+
+const cols = currentRows.length
+
+?
+
+Object.keys(
+
+currentRows[0]
+
+)
+
+:
+
+["id"];
+
+cols.forEach(c=>{
+
+html+=`
+
+<input
+
+id="${c}"
+
+placeholder="${c}"
+
+>
+
+`;
+
+});
+
+openModal(
+
+"Add Row",
+
+html,
+
+()=>{
+
+const data={};
+
+cols.forEach(c=>{
+
+data[c]=
+
+document.getElementById(
+
+c
+
+).value;
+
+});
+
+addRow(data);
+
+closeModal();
+
+}
+
+);
+
+};
+function editRow(id){
+
+const row = currentRows.find(
+
+r=>r.id==id
+
+);
+
+if(!row){
+
+toast(
+
+"Not Found"
+
+);
+
+return;
+
+}
+
+let html="";
+
+Object.keys(row).forEach(c=>{
+
+html+=`
+
+<input
+
+id="${c}"
+
+value="${row[c]}"
+
+>
+
+`;
+
+});
+
+openModal(
+
+"Edit Row",
+
+html,
+
+()=>{
+
+const data={};
+
+Object.keys(row)
+
+.forEach(c=>{
+
+data[c]=
+
+document.getElementById(
+
+c
+
+).value;
+
+});
+
+updateRow(
+
+id,
+
+data
+
+);
+
+closeModal();
+
+}
+
+);
+
+}
+
+
+
+document.getElementById(
+
+"exportBtn"
+
+).onclick=()=>{
+
+if(!currentRows.length)
+
+return;
+
+const cols=
+
+Object.keys(
+
+currentRows[0]
+
+);
+
+let csv=
+
+cols.join(",");
+
+csv+="\n";
+
+currentRows.forEach(r=>{
+
+csv+=Object.values(
+
+r
+
+).join(",");
+
+csv+="\n";
+
+});
+
+const blob=new Blob(
+
+[csv],
+
+{
+
+type:"text/csv"
+
+}
+
+);
+
+const a=
+
+document.createElement(
+
+"a"
+
+);
+
+a.href=
+
+URL.createObjectURL(
+
+blob
+
+);
+
+a.download=
+
+currentTable+".csv";
+
+a.click();
+
+};
+
+
 
 loadDatabases();
-
