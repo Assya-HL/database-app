@@ -1,467 +1,163 @@
 const API = "http://127.0.0.1:8001";
 
 let currentDB = "";
-
 let currentTable = "";
+let modalMode = "";
+
+let modalData = {};
+
+function toast(msg){
+const t=document.getElementById("toast");
+t.innerText=msg;
+t.style.display="block";
+setTimeout(()=>t.style.display="none",2000);
+}
+
+/* ================= MODAL ================= */
+
+function openModal(title, bodyHTML, mode){
+document.getElementById("modalTitle").innerText=title;
+document.getElementById("modalBody").innerHTML=bodyHTML;
+document.getElementById("modal").classList.remove("hidden");
+modalMode=mode;
+}
+
+function closeModal(){
+document.getElementById("modal").classList.add("hidden");
+modalData={};
+}
+
+function confirmModal(){
+if(modalMode==="db") createDB();
+if(modalMode==="table") createTable();
+if(modalMode==="row") createRow();
+closeModal();
+}
+
+/* ================= DB ================= */
 
 async function loadDatabases(){
+const res=await fetch(`${API}/databases/`);
+const data=await res.json();
 
-const res = await fetch(
-
-`${API}/databases/`
-
-);
-
-const data = await res.json();
-
-const list = document.getElementById(
-
-'dbList'
-
-);
-
-list.innerHTML='';
+document.getElementById("dbList").innerHTML="";
 
 data.forEach(db=>{
-
-list.innerHTML += `
-
-<li onclick="selectDB('${db}')">
-
-${db}
-
-</li>
-
+document.getElementById("dbList").innerHTML+=`
+<li onclick="selectDB('${db}')">${db}</li>
 `;
-
 });
 
+document.getElementById("dbCount").innerText=data.length;
 }
 
-async function selectDB(db){
+function openDbModal(){
+openModal("Create Database",`
+<input id="dbName" placeholder="Database name">
+`,"db");
+}
 
+async function createDB(){
+const name=document.getElementById("dbName").value;
+
+await fetch(`${API}/databases/`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name})
+});
+
+toast("Database created");
+loadDatabases();
+}
+
+/* ================= TABLE ================= */
+
+function selectDB(db){
 currentDB=db;
-
-document.getElementById(
-
-'currentDB'
-
-).innerText=db;
-
+document.getElementById("currentDB").innerText=db;
 loadTables();
-
-}
-
-async function createDatabasePrompt(){
-
-let name=
-
-prompt(
-
-'Database name'
-
-);
-
-if(!name)return;
-
-await fetch(
-
-`${API}/databases/`,
-
-{
-
-method:'POST',
-
-headers:{
-
-'Content-Type':'application/json'
-
-},
-
-body:JSON.stringify({
-
-name:name
-
-})
-
-}
-
-);
-
-loadDatabases();
-
-}
-
-async function deleteDB(db){
-
-await fetch(
-
-`${API}/databases/${db}`,
-
-{
-
-method:'DELETE'
-
-}
-
-);
-
-loadDatabases();
-
 }
 
 async function loadTables(){
+const res=await fetch(`${API}/databases/${currentDB}/tables`);
+const data=await res.json();
 
-const res=
+document.getElementById("tables").innerHTML="";
 
-await fetch(
-
-`${API}/databases/${currentDB}/tables`
-
-);
-
-const data=
-
-await res.json();
-
-const div=
-
-document.getElementById(
-
-'tables'
-
-);
-
-div.innerHTML='';
-
-data.forEach(table=>{
-
-div.innerHTML += `
-
+data.forEach(t=>{
+document.getElementById("tables").innerHTML+=`
 <div class="card">
-
-<h3>
-
-${table}
-
-</h3>
-
-<button onclick="showRows('${table}')">
-
-Open
-
-</button>
-
-<button class="delete"
-
-onclick="deleteTable('${table}')">
-
-Delete
-
-</button>
-
+<h3>${t}</h3>
+<button class="btn primary" onclick="loadRows('${t}')">Open</button>
 </div>
-
 `;
-
 });
 
+document.getElementById("tableCount").innerText=data.length;
 }
 
-async function createTablePrompt(){
-
-let table=
-
-prompt(
-
-'Table Name'
-
-);
-
-if(!table)return;
-
-let cols=
-
-prompt(
-
-'Columns separated by comma'
-
-);
-
-const columns=
-
-cols.split(',');
-
-await fetch(
-
-`${API}/databases/${currentDB}/tables`,
-
-{
-
-method:'POST',
-
-headers:{
-
-'Content-Type':'application/json'
-
-},
-
-body:JSON.stringify({
-
-table:table,
-
-columns:columns
-
-})
-
+function openTableModal(){
+openModal("Create Table",`
+<input id="tableName" placeholder="Table name">
+<input id="columns" placeholder="id,name,email">
+`,"table");
 }
 
-);
+async function createTable(){
+const table=document.getElementById("tableName").value;
+const columns=document.getElementById("columns").value.split(",");
 
+await fetch(`${API}/databases/${currentDB}/tables`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({table,columns})
+});
+
+toast("Table created");
 loadTables();
-
 }
 
-async function deleteTable(table){
+/* ================= ROWS ================= */
 
-await fetch(
-
-`${API}/databases/${currentDB}/tables/${table}`,
-
-{
-
-method:'DELETE'
-
+function openRowModal(){
+openModal("Add Row",`
+<textarea id="rowData" placeholder='{"id":1,"name":"Ali"}'></textarea>
+`,"row");
 }
 
-);
+async function createRow(){
+const row=JSON.parse(document.getElementById("rowData").value);
 
-loadTables();
+await fetch(`${API}/databases/${currentDB}/${currentTable}/rows`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(row)
+});
 
+toast("Row added");
+loadRows(currentTable);
 }
 
-async function showRows(table){
-
+async function loadRows(table){
 currentTable=table;
 
-const res=
+const res=await fetch(`${API}/databases/${currentDB}/${table}/rows`);
+const data=await res.json();
 
-await fetch(
+if(!data.length) return;
 
-`${API}/databases/${currentDB}/${table}/rows`
+const cols=Object.keys(data[0]);
 
-);
+document.getElementById("thead").innerHTML=`
+<tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr>
+`;
 
-const rows=
+document.getElementById("tbody").innerHTML=data.map(r=>
+`<tr>${cols.map(c=>`<td>${r[c]}</td>`).join("")}</tr>`
+).join("");
 
-await res.json();
-
-drawTable(rows);
-
+document.getElementById("rowCount").innerText=data.length;
 }
 
-function drawTable(rows){
-
-const thead=
-
-document.querySelector(
-
-'#records thead'
-
-);
-
-const tbody=
-
-document.querySelector(
-
-'#records tbody'
-
-);
-
-thead.innerHTML='';
-
-tbody.innerHTML='';
-
-if(rows.length===0)return;
-
-const cols=
-
-Object.keys(rows[0]);
-
-thead.innerHTML=
-
-'<tr>'+cols.map(c=>
-
-`<th>${c}</th>`
-
-).join('')
-
-+'<th>Actions</th></tr>';
-
-rows.forEach(r=>{
-
-tbody.innerHTML +=
-
-'<tr>'
-
-+
-
-cols.map(c=>
-
-`<td>${r[c]}</td>`
-
-).join('')
-
-+
-
-`<td>
-
-<button
-
-class="edit"
-
-onclick="editRow('${r.id}')">
-
-Edit
-
-</button>
-
-<button
-
-class="delete"
-
-onclick="deleteRow('${r.id}')">
-
-Delete
-
-</button>
-
-</td>`
-
-+
-
-'</tr>';
-
-});
-
-}
-
-async function insertRowPrompt(){
-
-const text=
-
-prompt(
-
-'JSON Row'
-
-);
-
-if(!text)return;
-
-const row=
-
-JSON.parse(text);
-
-await fetch(
-
-`${API}/databases/${currentDB}/${currentTable}/rows`,
-
-{
-
-method:'POST',
-
-headers:{
-
-'Content-Type':'application/json'
-
-},
-
-body:JSON.stringify(
-
-row
-
-)
-
-}
-
-);
-
-showRows(
-
-currentTable
-
-);
-
-}
-
-async function editRow(id){
-
-const text=
-
-prompt(
-
-'New JSON'
-
-);
-
-if(!text)return;
-
-const row=
-
-JSON.parse(text);
-
-await fetch(
-
-`${API}/databases/${currentDB}/${currentTable}/rows/${id}`,
-
-{
-
-method:'PUT',
-
-headers:{
-
-'Content-Type':'application/json'
-
-},
-
-body:JSON.stringify(
-
-row
-
-)
-
-}
-
-);
-
-showRows(
-
-currentTable
-
-);
-
-}
-
-async function deleteRow(id){
-
-await fetch(
-
-`${API}/databases/${currentDB}/${currentTable}/rows/${id}`,
-
-{
-
-method:'DELETE'
-
-}
-
-);
-
-showRows(
-
-currentTable
-
-);
-
-}
-
+/* INIT */
 loadDatabases();

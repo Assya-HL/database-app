@@ -1,111 +1,115 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Database Manager</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Database Manager Pro</title>
 
 <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-<div class="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar">
 
-<h2>Database Manager</h2>
+<h2>DB Manager</h2>
 
-<button onclick="createDatabasePrompt()">
-+ Database
+<button class="btn primary" onclick="openDbModal()">
++ New Database
 </button>
 
 <ul id="dbList"></ul>
 
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<header class="topbar">
+
+<h1 id="currentDB">No Database Selected</h1>
+
+<div>
+<button class="btn" onclick="loadDatabases()">Refresh</button>
 </div>
 
+</header>
 
-<div class="main">
+<!-- CARDS -->
+<section class="cards">
 
-<div class="topbar">
-
-<h1 id="currentDB">
-
-Select Database
-
-</h1>
-
-<button onclick="loadDatabases()">
-
-Refresh
-
-</button>
-
+<div class="card">
+<h3>Databases</h3>
+<p id="dbCount">0</p>
 </div>
 
+<div class="card">
+<h3>Tables</h3>
+<p id="tableCount">0</p>
+</div>
 
-<div class="tables-header">
+<div class="card">
+<h3>Rows</h3>
+<p id="rowCount">0</p>
+</div>
 
+</section>
+
+<!-- TABLES -->
+<section class="panel">
+
+<div class="panel-header">
 <h2>Tables</h2>
-
-<button onclick="createTablePrompt()">
-
-+ Table
-
-</button>
-
+<button class="btn primary" onclick="openTableModal()">+ Table</button>
 </div>
 
+<div id="tables"></div>
 
-<div id="tables">
+</section>
 
+<!-- ROWS -->
+<section class="panel">
+
+<div class="panel-header">
+<h2>Rows</h2>
+<button class="btn primary" onclick="openRowModal()">+ Row</button>
 </div>
 
-
-<div class="records-header">
-
-<h2>
-
-Rows
-
-</h2>
-
-<button onclick="insertRowPrompt()">
-
-+ Row
-
-</button>
-
-</div>
-
-
-<div class="table-container">
-
-<table id="records">
-
-<thead>
-
-</thead>
-
-<tbody>
-
-</tbody>
-
+<table>
+<thead id="thead"></thead>
+<tbody id="tbody"></tbody>
 </table>
 
-</div>
+</section>
+
+</main>
 
 </div>
 
+<!-- MODALS -->
+
+<div id="modal" class="modal hidden">
+<div class="modal-content">
+
+<h3 id="modalTitle"></h3>
+
+<div id="modalBody"></div>
+
+<div class="modal-actions">
+<button class="btn" onclick="closeModal()">Cancel</button>
+<button class="btn primary" onclick="confirmModal()">Confirm</button>
 </div>
+
+</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script src="script.js"></script>
-
 </body>
-
 </html>
