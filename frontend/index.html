@@ -1,84 +1,579 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlatDB Studio — Professional</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Database Manager</title>
+
+<link
+rel="stylesheet"
+href="style.css">
+
+<link
+rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 </head>
+
 <body>
 
-    <header class="main-header">
-        <div class="logo-area">
-            <div class="icon-box">📁</div>
-            <div>
-                <h1>FlatDB Studio</h1>
-                <p class="status"><span class="pulse-dot"></span> FastAPI Backend Active (Port 8001)</p>
-            </div>
-        </div>
-    </header>
 
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div class="section">
-                <div class="section-header">
-                    <span>Bases de Données</span>
-                </div>
-                <div class="form-row">
-                    <input type="text" id="new-db-name" placeholder="Nom de la DB...">
-                    <button onclick="createDatabase()" class="btn-add">+</button>
-                </div>
-                <div id="db-list" class="list-container">
-                    </div>
-            </div>
+<!-- Loader -->
 
-            <div class="section">
-                <div class="section-header">
-                    <span>Tables (<span id="current-db-name" style="color:var(--primary-hover);">Aucune</span>)</span>
-                </div>
-                <div class="form-row">
-                    <input type="text" id="new-table-name" placeholder="Table...">
-                    <input type="text" id="new-table-columns" placeholder="id,name,col...">
-                    <button onclick="createTable()" class="btn-add">+</button>
-                </div>
-                <div id="table-list" class="list-container">
-                    <div class="empty-msg">Sélectionnez une DB</div>
-                </div>
-            </div>
-        </aside>
+<div id="loader">
 
-        <main class="main-content">
-            <div class="table-card">
-                <div class="table-header-meta">
-                    <div>
-                        <h2 id="active-table-title">Sélectionnez une table CSV</h2>
-                        <p class="sub-text">Visualisation en temps réel</p>
-                    </div>
-                    <button onclick="openAddRowModal()" class="btn-primary">+ Ajouter une ligne</button>
-                </div>
+<div class="spinner"></div>
 
-                <div class="table-wrapper">
-                    <table id="data-table" class="professional-table">
-                        <thead>
-                            <tr id="table-headers"></tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <tr>
-                                <td colspan="100%" style="text-align: center; color: var(--text-muted); padding: 40px;">
-                                    Aucune donnée à afficher pour le moment.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
+</div>
 
-    <script>
-        setTimeout(() => { lucide.createIcons(); }, 500);
-    </script>
-    <script src="script.js"></script>
+
+<div class="layout">
+
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<div class="logo">
+
+<i class="bi bi-database-fill"></i>
+
+<span>DB Manager</span>
+
+</div>
+
+
+<nav>
+
+<a class="active">
+
+<i class="bi bi-grid"></i>
+
+Dashboard
+
+</a>
+
+
+<a>
+
+<i class="bi bi-folder"></i>
+
+Databases
+
+</a>
+
+
+<a>
+
+<i class="bi bi-table"></i>
+
+Tables
+
+</a>
+
+
+<a>
+
+<i class="bi bi-clock-history"></i>
+
+Activity
+
+</a>
+
+
+<a>
+
+<i class="bi bi-gear"></i>
+
+Settings
+
+</a>
+
+</nav>
+
+
+
+<div class="sidebar-footer">
+
+<div class="user">
+
+<div class="avatar">
+
+AH
+
+</div>
+
+<div>
+
+<h4>Admin</h4>
+
+<p>Database Manager</p>
+
+</div>
+
+</div>
+
+</div>
+
+</aside>
+
+
+
+
+
+<main class="main">
+
+
+<!-- TOPBAR -->
+
+<header class="topbar">
+
+
+<div class="search-box">
+
+<i class="bi bi-search"></i>
+
+<input
+
+id="searchInput"
+
+type="text"
+
+placeholder="Search..."
+
+>
+
+</div>
+
+
+
+<div class="actions">
+
+<button
+
+id="refreshBtn"
+
+class="btn"
+
+>
+
+<i class="bi bi-arrow-clockwise"></i>
+
+Refresh
+
+</button>
+
+
+
+<button
+
+id="createDbBtn"
+
+class="btn primary"
+
+>
+
+<i class="bi bi-plus-circle"></i>
+
+New Database
+
+</button>
+
+</div>
+
+
+</header>
+
+
+
+
+
+<!-- DASHBOARD CARDS -->
+
+<section class="cards">
+
+
+<div class="card">
+
+<div>
+
+<h5>Total Databases</h5>
+
+<h2 id="dbCount">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-folder-fill"></i>
+
+</div>
+
+
+
+<div class="card">
+
+<div>
+
+<h5>Total Tables</h5>
+
+<h2 id="tableCount">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-table"></i>
+
+</div>
+
+
+
+<div class="card">
+
+<div>
+
+<h5>Total Rows</h5>
+
+<h2 id="rowCount">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-list-ul"></i>
+
+</div>
+
+
+
+<div class="card">
+
+<div>
+
+<h5>Status</h5>
+
+<h2>
+
+Online
+
+</h2>
+
+</div>
+
+<i class="bi bi-check-circle-fill"></i>
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- DATABASES -->
+
+<section class="panel">
+
+
+<div class="panel-header">
+
+<h3>
+
+Databases
+
+</h3>
+
+
+<button
+
+id="addDatabase"
+
+class="btn primary"
+
+>
+
++
+
+</button>
+
+
+</div>
+
+
+<div
+
+id="databaseList"
+
+class="grid"
+
+>
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- TABLES -->
+
+<section class="panel">
+
+
+<div class="panel-header">
+
+
+<h3>
+
+Tables
+
+</h3>
+
+
+<button
+
+id="addTable"
+
+class="btn primary"
+
+>
+
++
+
+</button>
+
+</div>
+
+
+<div
+
+id="tableList"
+
+class="grid"
+
+>
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- ROWS -->
+
+<section class="panel">
+
+
+<div class="panel-header">
+
+
+<h3>
+
+Rows
+
+</h3>
+
+
+<div>
+
+
+<button
+
+id="exportBtn"
+
+class="btn"
+
+>
+
+Export CSV
+
+</button>
+
+
+
+<button
+
+id="addRow"
+
+class="btn primary"
+
+>
+
+Add Row
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="table-wrapper">
+
+
+<table>
+
+
+<thead id="tableHead">
+
+</thead>
+
+
+
+<tbody id="tableBody">
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+</section>
+
+
+
+</main>
+
+
+</div>
+
+
+
+
+
+
+<!-- MODAL -->
+
+<div
+
+id="modal"
+
+class="modal hidden"
+
+>
+
+
+<div class="modal-content">
+
+
+<div class="modal-header">
+
+
+<h2 id="modalTitle">
+
+Title
+
+</h2>
+
+
+<button id="closeModal">
+
+×
+
+</button>
+
+
+</div>
+
+
+
+<div
+
+id="modalBody"
+
+class="modal-body"
+
+>
+
+</div>
+
+
+
+<div class="modal-footer">
+
+
+<button
+
+id="cancelBtn"
+
+class="btn"
+
+>
+
+Cancel
+
+</button>
+
+
+
+<button
+
+id="saveBtn"
+
+class="btn primary"
+
+>
+
+Save
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- Toast -->
+
+<div
+
+id="toastContainer"
+
+>
+
+</div>
+
+
+
+
+
+<script src="script.js">
+
+</script>
+
 </body>
+
 </html>
