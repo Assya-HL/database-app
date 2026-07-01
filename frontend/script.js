@@ -1,69 +1,86 @@
 const API = "http://127.0.0.1:8001";
 
-window.onload = () => {
+window.onload = function () {
     loadDBs();
 };
 
 async function createDB() {
 
-    const name = document.getElementById("dbname").value;
+    try {
 
-    if (!name) {
-        alert("Enter database name");
-        return;
+        const name = document.getElementById("dbname").value.trim();
+
+        if (name === "") {
+
+            alert("Enter database name");
+
+            return;
+        }
+
+        const response = await fetch(`${API}/databases/`, {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json"
+
+            },
+
+            body: JSON.stringify({
+
+                name: name
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        alert(data.message);
+
+        document.getElementById("dbname").value = "";
+
+        loadDBs();
+
     }
 
-    const response = await fetch(`${API}/databases/`, {
+    catch (error) {
 
-        method: "POST",
+        console.log(error);
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+        alert("Error while creating database");
 
-        body: JSON.stringify({
-            name: name
-        })
-
-    });
-
-    const data = await response.json();
-
-    alert(data.message);
-
-    document.getElementById("dbname").value = "";
-
-    await loadDBs();
+    }
 
 }
 
+
+
+awindow.onload = function () {
+    loadDBs();
+};
 
 async function loadDBs() {
 
+    console.log("Refresh clicked");
+
     const response = await fetch(
-
         `${API}/databases/`
-
     );
 
     const data = await response.json();
 
-    const list = document.getElementById(
-
-        "databases"
-
-    );
+    const list = document.getElementById("databases");
 
     list.innerHTML = "";
 
-    for (let db of data) {
+    data.forEach(db => {
 
-        const li = document.createElement("li");
+        list.innerHTML += `<li>${db}</li>`;
 
-        li.textContent = db;
-
-        list.appendChild(li);
-
-    }
+    });
 
 }
+document.getElementById("refreshBtn")
+.addEventListener("click", loadDBs);
