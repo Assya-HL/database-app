@@ -1,99 +1,33 @@
-body{
-margin:0;
-font-family:Arial;
-background:#0b1220;
-color:white;
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #ffffff;
+    color: #333333;
 }
 
-.app{
-display:flex;
-height:100vh;
+button {
+    cursor: pointer;
+    padding: 5px 10px;
+    margin: 2px;
 }
 
-/* PANELS */
-.panel{
-padding:15px;
-border-right:1px solid #1f2937;
-overflow:auto;
+input {
+    padding: 5px;
+    margin-right: 5px;
 }
 
-.left{width:20%;background:#0f172a;}
-.middle{width:25%;background:#0f172a;}
-.right{flex:1;background:#0f172a;}
-
-/* BUTTONS */
-button{
-background:#2563eb;
-color:white;
-border:none;
-padding:8px 10px;
-margin:5px 0;
-border-radius:6px;
-cursor:pointer;
+.db-item, .table-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* LISTS */
-#dbList div,
-#tableList div{
-padding:8px;
-margin:5px 0;
-background:#111827;
-border-radius:6px;
-cursor:pointer;
-}
-
-#dbList div:hover,
-#tableList div:hover{
-background:#1f2937;
-}
-
-/* TABLE */
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
-
-th,td{
-padding:8px;
-border-bottom:1px solid #1f2937;
-}
-
-/* MODAL */
-.modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.6);
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.hidden{display:none}
-
-.modal-box{
-background:#111827;
-padding:15px;
-border-radius:8px;
-width:350px;
-}
-
-input,textarea{
-width:100%;
-padding:8px;
-margin:5px 0;
-background:#0f172a;
-color:white;
-border:none;
-}
-
-/* TOAST */
-#toast{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#10b981;
-padding:10px;
-border-radius:6px;
-display:none;
+.active {
+    background-color: #d1e7dd !important;
+    border-color: #badbcc !important;
+    font-weight: bold;
 }

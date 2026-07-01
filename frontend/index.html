@@ -1,69 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>DB Manager</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>FlatDB Simple Test</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="app">
+    <h2>📁 FlatDB Studio — Test Minimal</h2>
+    <hr>
 
-<!-- LEFT: DATABASES -->
-<div class="panel left">
+    <h3>1. Les Bases de Données</h3>
+    <div style="margin-bottom: 15px;">
+        <input type="text" id="new-db-name" placeholder="Nom de la DB (ex: ecom_db)">
+        <button onclick="createDatabase()">+ Créer la DB</button>
+    </div>
+    
+    <div id="db-list" style="border: 1px solid #ccc; padding: 10px; background: #eee;">
+        Chargement des bases...
+    </div>
 
-<h3>Databases</h3>
+    <hr>
 
-<button onclick="openModal('db')">+ New</button>
+    <h3>2. Les Tables dans la DB active: <span id="current-db-name" style="color: blue;">Aucune</span></h3>
+    <div style="margin-bottom: 15px;">
+        <input type="text" id="new-table-name" placeholder="Nom de la table (ex: users)">
+        <input type="text" id="new-table-columns" placeholder="Colonnes (ex: id,name,email)">
+        <button onclick="createTable()">+ Créer la Table</button>
+    </div>
 
-<div id="dbList"></div>
+    <div id="table-list" style="border: 1px solid #ccc; padding: 10px; background: #eee;">
+        Sélectionnez d'abord une base de données.
+    </div>
 
-</div>
+    <hr>
 
-<!-- CENTER: TABLES -->
-<div class="panel middle">
+    <h3>3. Données de la table: <span id="active-table-title" style="color: green;">Aucune</span></h3>
+    <div style="margin-bottom: 15px;">
+        <button onclick="openAddRowModal()">+ Ajouter une ligne</button>
+    </div>
 
-<h3 id="currentDB">Select Database</h3>
+    <table border="1" cellpadding="5" id="data-table" style="width: 100%; border-collapse: collapse; display: none;">
+        <thead>
+            <tr id="table-headers"></tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
 
-<button onclick="openModal('table')">+ Table</button>
-
-<div id="tableList"></div>
-
-</div>
-
-<!-- RIGHT: ROWS -->
-<div class="panel right">
-
-<h3 id="currentTable">Rows</h3>
-
-<button onclick="openModal('row')">+ Row</button>
-
-<table>
-<thead id="thead"></thead>
-<tbody id="tbody"></tbody>
-</table>
-
-</div>
-
-</div>
-
-<!-- MODAL -->
-<div id="modal" class="modal hidden">
-<div class="modal-box">
-
-<h3 id="modalTitle"></h3>
-<div id="modalBody"></div>
-
-<button onclick="save()">Save</button>
-<button onclick="closeModal()">Cancel</button>
-
-</div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
