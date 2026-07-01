@@ -1,110 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DB Manager Pro</title>
+<title>DB Manager</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="layout">
+<div class="app">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
+<!-- LEFT: DATABASES -->
+<div class="panel left">
 
-<div class="logo">DB Manager</div>
+<h3>Databases</h3>
 
-<button class="btn primary" onclick="openModal('db')">
-+ Database
-</button>
+<button onclick="openModal('db')">+ New</button>
 
-<div id="dbList" class="list"></div>
-
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-<header>
-<h1 id="title">Select Database</h1>
-</header>
-
-<!-- STATS -->
-<div class="stats">
-
-<div class="card">
-<span>Databases</span>
-<h2 id="dbCount">0</h2>
-</div>
-
-<div class="card">
-<span>Tables</span>
-<h2 id="tableCount">0</h2>
-</div>
-
-<div class="card">
-<span>Rows</span>
-<h2 id="rowCount">0</h2>
-</div>
+<div id="dbList"></div>
 
 </div>
 
-<!-- TABLES -->
-<section class="section">
+<!-- CENTER: TABLES -->
+<div class="panel middle">
 
-<div class="section-header">
-<h3>Tables</h3>
-<button class="btn" onclick="openModal('table')">+ Table</button>
+<h3 id="currentDB">Select Database</h3>
+
+<button onclick="openModal('table')">+ Table</button>
+
+<div id="tableList"></div>
+
 </div>
 
-<div id="tables" class="grid"></div>
+<!-- RIGHT: ROWS -->
+<div class="panel right">
 
-</section>
+<h3 id="currentTable">Rows</h3>
 
-<!-- ROWS -->
-<section class="section">
-
-<div class="section-header">
-<h3>Rows</h3>
-<button class="btn" onclick="openModal('row')">+ Row</button>
-</div>
+<button onclick="openModal('row')">+ Row</button>
 
 <table>
 <thead id="thead"></thead>
 <tbody id="tbody"></tbody>
 </table>
 
-</section>
-
-</main>
+</div>
 
 </div>
 
 <!-- MODAL -->
 <div id="modal" class="modal hidden">
-
 <div class="modal-box">
 
 <h3 id="modalTitle"></h3>
-
 <div id="modalBody"></div>
 
-<div class="actions">
-<button class="btn" onclick="closeModal()">Cancel</button>
-<button class="btn primary" onclick="confirmModal()">Save</button>
-</div>
+<button onclick="save()">Save</button>
+<button onclick="closeModal()">Cancel</button>
 
 </div>
-
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
