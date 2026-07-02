@@ -23,14 +23,30 @@ def create_database(name):
 
     os.makedirs(path)
 
+    open(
+
+        os.path.join(
+
+            path,
+
+            ".gitkeep"
+
+        ),
+
+        "w"
+
+    ).close()
+
     sync_git(
 
-    f"Create database {name}"
+        f"Create database {name}"
 
-)
+    )
 
     return {
+
         "message": "Database created"
+
     }
 
 
