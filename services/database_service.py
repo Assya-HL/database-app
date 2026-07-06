@@ -1,26 +1,71 @@
-from services.encryption import encrypt,decrypt
 import os
 import csv
+import json
 import shutil
 import subprocess
 
+from services.encryption import (
+    encrypt,
+    decrypt,
+    encrypt_db_name,
+    encrypt_table_name
+)
+
 DATABASE_DIR = "database"
+META = "database/metadata.json"
 
 os.makedirs(DATABASE_DIR, exist_ok=True)
 
 
+def load_meta():
+
+    if not os.path.exists(META):
+
+        with open(META, "w") as f:
+
+            json.dump({}, f)
+
+    with open(META, "r") as f:
+
+        return json.load(f)
+
+
+def save_meta(data):
+
+    with open(META, "w") as f:
+
+        json.dump(
+
+            data,
+
+            f,
+
+            indent=4
+
+        )
+
+
 def create_database(name):
 
-    path = os.path.join(
-        DATABASE_DIR,
-        name
-    )
+    meta = load_meta()
 
-    if os.path.exists(path):
+    if name in meta:
 
         return {
+
             "message": "Database already exists"
+
         }
+
+    enc = encrypt_db_name(name)
+
+    path = os.path.join(
+
+        DATABASE_DIR,
+
+        enc
+
+    )
 
     os.makedirs(path)
 
@@ -38,6 +83,16 @@ def create_database(name):
 
     ).close()
 
+    meta[name] = {
+
+        "encrypted": enc,
+
+        "tables": {}
+
+    }
+
+    save_meta(meta)
+
     sync_git(
 
         f"Create database {name}"
@@ -53,64 +108,63 @@ def create_database(name):
 
 def list_databases():
 
-   return [
+    meta = load_meta()
 
-    d
+    return list(
 
-    for d in os.listdir(DATABASE_DIR)
+        meta.keys()
 
-    if os.path.isdir(
+    )
+
+
+def delete_database(name):
+
+    meta = load_meta()
+
+    if name not in meta:
+
+        return {
+
+            "message": "Database not found"
+
+        }
+
+    enc = meta[name]["encrypted"]
+
+    shutil.rmtree(
 
         os.path.join(
 
             DATABASE_DIR,
 
-            d
+            enc
 
         )
 
     )
 
-]
+    del meta[name]
 
-
-def delete_database(name):
-
-    path = os.path.join(
-        DATABASE_DIR,
-        name
-    )
-
-    if not os.path.exists(path):
-
-        return {
-            "message": "Database not found"
-        }
-
-    shutil.rmtree(path)
+    save_meta(meta)
 
     sync_git(
 
-    f"Delete database {name}"
+        f"Delete database {name}"
 
-)
+    )
 
     return {
+
         "message": "Database deleted"
+
     }
 
 
 def create_table(db, table, columns):
 
-    db_path = os.path.join(
+    meta = load_meta()
 
-        DATABASE_DIR,
-
-        db
-
-    )
-
-    if not os.path.exists(db_path):
+    if db not in meta:
 
         return {
 
@@ -118,11 +172,23 @@ def create_table(db, table, columns):
 
         }
 
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = encrypt_table_name(table)
+
+    db_path = os.path.join(
+
+        DATABASE_DIR,
+
+        enc_db
+
+    )
+
     file = os.path.join(
 
         db_path,
 
-        f"{table}.csv"
+        f"{enc_table}.csv"
 
     )
 
@@ -150,11 +216,15 @@ def create_table(db, table, columns):
 
         writer.writerow(columns)
 
+    meta[db]["tables"][table] = enc_table
+
+    save_meta(meta)
+
     sync_git(
 
-    f"Create table {table}"
+        f"Create table {table}"
 
-) 
+    )
 
     return {
 
@@ -165,15 +235,9 @@ def create_table(db, table, columns):
 
 def list_tables(db):
 
-    path = os.path.join(
+    meta = load_meta()
 
-        DATABASE_DIR,
-
-        db
-
-    )
-
-    if not os.path.exists(path):
+    if db not in meta:
 
         return {
 
@@ -181,34 +245,26 @@ def list_tables(db):
 
         }
 
-    tables = []
+    return list(
 
-    for f in os.listdir(path):
+        meta[db]["tables"].keys()
 
-        if f.endswith(".csv"):
-
-            tables.append(
-
-                f.replace(".csv", "")
-
-            )
-
-    return tables
+    )
 
 
 def delete_table(db, table):
 
-    file = os.path.join(
+    meta = load_meta()
 
-        DATABASE_DIR,
+    if db not in meta:
 
-        db,
+        return {
 
-        f"{table}.csv"
+            "message": "Database not found"
 
-    )
+        }
 
-    if not os.path.exists(file):
+    if table not in meta[db]["tables"]:
 
         return {
 
@@ -216,13 +272,31 @@ def delete_table(db, table):
 
         }
 
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = meta[db]["tables"][table]
+
+    file = os.path.join(
+
+        DATABASE_DIR,
+
+        enc_db,
+
+        f"{enc_table}.csv"
+
+    )
+
     os.remove(file)
+
+    del meta[db]["tables"][table]
+
+    save_meta(meta)
 
     sync_git(
 
-    f"Delete table {table}"
+        f"Delete table {table}"
 
-)
+    )
 
     return {
 
@@ -233,13 +307,19 @@ def delete_table(db, table):
 
 def insert_row(db, table, row):
 
+    meta = load_meta()
+
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = meta[db]["tables"][table]
+
     file = os.path.join(
 
         DATABASE_DIR,
 
-        db,
+        enc_db,
 
-        f"{table}.csv"
+        f"{enc_table}.csv"
 
     )
 
@@ -250,6 +330,16 @@ def insert_row(db, table, row):
             "message": "Table not found"
 
         }
+
+    encrypted = []
+
+    for value in row.values():
+
+        encrypted.append(
+
+            encrypt(value)
+
+        )
 
     with open(
 
@@ -264,16 +354,6 @@ def insert_row(db, table, row):
     ) as f:
 
         writer = csv.writer(f)
-
-        encrypted = []
-
-        for value in row.values():
-
-            encrypted.append(
-
-                encrypt(value)
-
-            )
 
         writer.writerow(
 
@@ -293,25 +373,24 @@ def insert_row(db, table, row):
 
     }
 
+
 def get_rows(db, table):
+
+    meta = load_meta()
+
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = meta[db]["tables"][table]
 
     file = os.path.join(
 
         DATABASE_DIR,
 
-        db,
+        enc_db,
 
-        f"{table}.csv"
+        f"{enc_table}.csv"
 
     )
-
-    if not os.path.exists(file):
-
-        return {
-
-            "message": "Table not found"
-
-        }
 
     rows = []
 
@@ -329,15 +408,15 @@ def get_rows(db, table):
 
         for row in reader:
 
-            decrypted = {}
+            item = {}
 
             for k, v in row.items():
 
-                decrypted[k] = decrypt(v)
+                item[k] = decrypt(v)
 
             rows.append(
 
-                decrypted
+                item
 
             )
 
@@ -346,23 +425,21 @@ def get_rows(db, table):
 
 def update_row(db, table, row_id, new_data):
 
+    meta = load_meta()
+
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = meta[db]["tables"][table]
+
     file = os.path.join(
 
         DATABASE_DIR,
 
-        db,
+        enc_db,
 
-        f"{table}.csv"
+        f"{enc_table}.csv"
 
     )
-
-    if not os.path.exists(file):
-
-        return {
-
-            "message": "Table not found"
-
-        }
 
     rows = []
 
@@ -380,33 +457,21 @@ def update_row(db, table, row_id, new_data):
 
         for row in reader:
 
-            if decrypt(row["id"]) == str(row_id):
+            if decrypt(
 
-                encrypted = {}
+                    row["id"]
+
+            ) == str(row_id):
 
                 for k, v in new_data.items():
 
-                    encrypted[k] = encrypt(v)
-
-                row.update(
-
-                    encrypted
-
-                )
+                    row[k] = encrypt(v)
 
             rows.append(
 
                 row
 
             )
-
-    if not rows:
-
-        return {
-
-            "message": "No rows found"
-
-        }
 
     with open(
 
@@ -448,57 +513,115 @@ def update_row(db, table, row_id, new_data):
 
     }
 
+
 def delete_row(db, table, row_id):
 
-    file = os.path.join(
-        DATABASE_DIR,
-        db,
-        f"{table}.csv"
-    )
+    meta = load_meta()
 
-    if not os.path.exists(file):
-        return {"message": "Table not found"}
+    enc_db = meta[db]["encrypted"]
+
+    enc_table = meta[db]["tables"][table]
+
+    file = os.path.join(
+
+        DATABASE_DIR,
+
+        enc_db,
+
+        f"{enc_table}.csv"
+
+    )
 
     rows = []
 
-    with open(file, "r", encoding="utf-8") as f:
+    with open(
+
+            file,
+
+            "r",
+
+            encoding="utf-8"
+
+    ) as f:
 
         reader = csv.DictReader(f)
 
         for row in reader:
 
-            try:
-                current_id = decrypt(row["id"])
-            except:
-                current_id = row["id"]
+            if decrypt(
 
-            if current_id != str(row_id):
-                rows.append(row)
+                    row["id"]
 
-    with open(file, "w", newline="", encoding="utf-8") as f:
+            ) != str(row_id):
 
-        if rows:
+                rows.append(
 
-            writer = csv.DictWriter(
-                f,
-                fieldnames=rows[0].keys()
-            )
+                    row
 
-            writer.writeheader()
-            writer.writerows(rows)
+                )
 
-    sync_git(f"Delete row {row_id}")
+    with open(
 
-    return {"message": "Row deleted"}
+            file,
+
+            "w",
+
+            newline="",
+
+            encoding="utf-8"
+
+    ) as f:
+
+        writer = csv.DictWriter(
+
+            f,
+
+            fieldnames=rows[0].keys()
+
+        )
+
+        writer.writeheader()
+
+        writer.writerows(
+
+            rows
+
+        )
+
+    sync_git(
+
+        f"Delete row {row_id}"
+
+    )
+
+    return {
+
+        "message": "Row deleted"
+
+    }
 
 
 def sync_git(message):
 
-    subprocess.run(["git", "add", "."])
+    subprocess.run(
+
+        ["git", "add", "."]
+
+    )
 
     subprocess.run(
 
-        ["git", "commit", "-m", message],
+        [
+
+            "git",
+
+            "commit",
+
+            "-m",
+
+            message
+
+        ],
 
         capture_output=True
 
@@ -506,8 +629,15 @@ def sync_git(message):
 
     subprocess.run(
 
-        ["git", "push"],
+        [
+
+            "git",
+
+            "push"
+
+        ],
 
         capture_output=True
 
     )
+

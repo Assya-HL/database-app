@@ -1,4 +1,5 @@
 from cryptography.fernet import Fernet
+import hashlib
 import os
 
 KEY_FILE = "secret.key"
@@ -14,8 +15,9 @@ def load_key():
 
             f.write(key)
 
-    with open(KEY_FILE, "rb") as f:
 
+    with open(KEY_FILE, "rb") as f:
+        
         return f.read()
 
 
@@ -40,3 +42,31 @@ def decrypt(text):
         text.encode()
 
     ).decode()
+
+
+def encrypt_db_name(name):
+
+    return hashlib.sha256(
+
+        name.encode()
+
+    ).hexdigest()
+
+
+def decrypt_db_name(name):
+
+    return name
+
+
+def encrypt_table_name(name):
+
+    return hashlib.sha256(
+
+        name.encode()
+
+    ).hexdigest()
+
+
+def decrypt_table_name(name):
+
+    return name
