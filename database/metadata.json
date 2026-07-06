@@ -4,5 +4,9 @@
         "tables": {
             "user": "04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb"
         }
+    },
+    "database1": {
+        "encrypted": "acad7c1c7504df2f2f7a112e1a782f8bcd2c43b900400140fa466b41fcacfb0b",
+        "tables": {}
     }
 }
