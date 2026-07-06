@@ -7,6 +7,8 @@
     },
     "database1": {
         "encrypted": "acad7c1c7504df2f2f7a112e1a782f8bcd2c43b900400140fa466b41fcacfb0b",
-        "tables": {}
+        "tables": {
+            "etudiants": "f37131323da89c3147d26f6c6ed383db209b76bb0aa01b8732013c486ec51788"
+        }
     }
 }
