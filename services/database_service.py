@@ -457,50 +457,40 @@ def delete_row(db, table, row_id):
     )
 
     if not os.path.exists(file):
-        return {
-            "message": "Table not found"
-        }
+        return {"message": "Table not found"}
 
     rows = []
 
-    with open(
-        file,
-        "r",
-        encoding="utf-8"
-    ) as f:
+    with open(file, "r", encoding="utf-8") as f:
 
         reader = csv.DictReader(f)
 
-        headers = reader.fieldnames
-
         for row in reader:
 
-            if row.get("id") != str(row_id):
+            try:
+                current_id = decrypt(row["id"])
+            except:
+                current_id = row["id"]
+
+            if current_id != str(row_id):
                 rows.append(row)
 
-    with open(
-        file,
-        "w",
-        newline="",
-        encoding="utf-8"
-    ) as f:
+    with open(file, "w", newline="", encoding="utf-8") as f:
 
-        writer = csv.DictWriter(
-            f,
-            fieldnames=headers
-        )
+        if rows:
 
-        writer.writeheader()
+            writer = csv.DictWriter(
+                f,
+                fieldnames=rows[0].keys()
+            )
 
-        writer.writerows(rows)
+            writer.writeheader()
+            writer.writerows(rows)
 
-    sync_git(
-        f"Delete row {row_id}"
-    )
+    sync_git(f"Delete row {row_id}")
 
-    return {
-        "message": "Row deleted"
-    }
+    return {"message": "Row deleted"}
+
 
 def sync_git(message):
 
