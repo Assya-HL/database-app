@@ -1,4 +1,5 @@
-venv/
+secret.key
+database/metadata.json
+
 __pycache__/
 *.pyc
-.vscode/
