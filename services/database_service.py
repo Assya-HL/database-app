@@ -2,37 +2,78 @@ import os
 import csv
 import json
 import shutil
+import hashlib
 import subprocess
 
-from services.encryption import (
-    encrypt,
-    decrypt,
-    encrypt_db_name,
-    encrypt_table_name
-)
+from services.encryption import encrypt, decrypt
 
 DATABASE_DIR = "database"
-META = "database/metadata.json"
+META = os.path.join(DATABASE_DIR, "metadata.json")
 
 os.makedirs(DATABASE_DIR, exist_ok=True)
+
+
+def hash_name(name):
+
+    return hashlib.sha256(
+
+        name.encode()
+
+    ).hexdigest()
 
 
 def load_meta():
 
     if not os.path.exists(META):
 
-        with open(META, "w") as f:
+        with open(
 
-            json.dump({}, f)
+            META,
 
-    with open(META, "r") as f:
+            "w",
 
-        return json.load(f)
+            encoding="utf-8"
+
+        ) as f:
+
+            json.dump(
+
+                {},
+
+                f
+
+            )
+
+    with open(
+
+            META,
+
+            "r",
+
+            encoding="utf-8"
+
+    ) as f:
+
+        content = f.read().strip()
+
+        if content == "":
+
+            return {}
+
+        return json.loads(content)
 
 
 def save_meta(data):
 
-    with open(META, "w") as f:
+    with open(
+
+            META,
+
+            "w",
+
+            encoding="utf-8"
+
+    ) as f:
 
         json.dump(
 
@@ -57,7 +98,7 @@ def create_database(name):
 
         }
 
-    enc = encrypt_db_name(name)
+    enc = hash_name(name)
 
     path = os.path.join(
 
@@ -67,21 +108,13 @@ def create_database(name):
 
     )
 
-    os.makedirs(path)
+    os.makedirs(
 
-    open(
+        path,
 
-        os.path.join(
+        exist_ok=True
 
-            path,
-
-            ".gitkeep"
-
-        ),
-
-        "w"
-
-    ).close()
+    )
 
     meta[name] = {
 
@@ -174,19 +207,13 @@ def create_table(db, table, columns):
 
     enc_db = meta[db]["encrypted"]
 
-    enc_table = encrypt_table_name(table)
-
-    db_path = os.path.join(
-
-        DATABASE_DIR,
-
-        enc_db
-
-    )
+    enc_table = hash_name(table)
 
     file = os.path.join(
 
-        db_path,
+        DATABASE_DIR,
+
+        enc_db,
 
         f"{enc_table}.csv"
 
@@ -214,7 +241,11 @@ def create_table(db, table, columns):
 
         writer = csv.writer(f)
 
-        writer.writerow(columns)
+        writer.writerow(
+
+            columns
+
+        )
 
     meta[db]["tables"][table] = enc_table
 
@@ -276,17 +307,19 @@ def delete_table(db, table):
 
     enc_table = meta[db]["tables"][table]
 
-    file = os.path.join(
+    os.remove(
 
-        DATABASE_DIR,
+        os.path.join(
 
-        enc_db,
+            DATABASE_DIR,
 
-        f"{enc_table}.csv"
+            enc_db,
+
+            f"{enc_table}.csv"
+
+        )
 
     )
-
-    os.remove(file)
 
     del meta[db]["tables"][table]
 
@@ -408,22 +441,22 @@ def get_rows(db, table):
 
         for row in reader:
 
-            item = {}
+            decrypted = {}
 
             for k, v in row.items():
 
-                item[k] = decrypt(v)
+                decrypted[k] = decrypt(v)
 
             rows.append(
 
-                item
+                decrypted
 
             )
 
     return rows
 
 
-def update_row(db, table, row_id, new_data):
+def update_row(db, table, row_id, data):
 
     meta = load_meta()
 
@@ -459,13 +492,21 @@ def update_row(db, table, row_id, new_data):
 
             if decrypt(
 
-                    row["id"]
+                row["id"]
 
             ) == str(row_id):
 
-                for k, v in new_data.items():
+                encrypted = {}
 
-                    row[k] = encrypt(v)
+                for k, v in data.items():
+
+                    encrypted[k] = encrypt(v)
+
+                row.update(
+
+                    encrypted
+
+                )
 
             rows.append(
 
@@ -605,23 +646,7 @@ def sync_git(message):
 
     subprocess.run(
 
-        ["git", "add", "."]
-
-    )
-
-    subprocess.run(
-
-        [
-
-            "git",
-
-            "commit",
-
-            "-m",
-
-            message
-
-        ],
+        ["git", "add", "."],
 
         capture_output=True
 
@@ -629,13 +654,15 @@ def sync_git(message):
 
     subprocess.run(
 
-        [
+        ["git", "commit", "-m", message],
 
-            "git",
+        capture_output=True
 
-            "push"
+    )
 
-        ],
+    subprocess.run(
+
+        ["git", "push"],
 
         capture_output=True
 
