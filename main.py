@@ -3,11 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routes.database import router
 
-app = FastAPI(
-
-    title="Database Application"
-
-)
+app = FastAPI(title="Database Application")
 
 app.add_middleware(
 
@@ -30,8 +26,4 @@ app.include_router(router)
 
 def home():
 
-    return {
-
-        "message": "Database Application"
-
-    }
+    return {"message": "API is running"}

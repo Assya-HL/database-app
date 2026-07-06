@@ -1,3 +1,4 @@
+from services.encryption import encrypt,decrypt
 import os
 import csv
 import shutil
@@ -52,7 +53,25 @@ def create_database(name):
 
 def list_databases():
 
-    return os.listdir(DATABASE_DIR)
+   return [
+
+    d
+
+    for d in os.listdir(DATABASE_DIR)
+
+    if os.path.isdir(
+
+        os.path.join(
+
+            DATABASE_DIR,
+
+            d
+
+        )
+
+    )
+
+]
 
 
 def delete_database(name):
@@ -246,20 +265,33 @@ def insert_row(db, table, row):
 
         writer = csv.writer(f)
 
-        writer.writerow(row.values())
+        encrypted = []
+
+        for value in row.values():
+
+            encrypted.append(
+
+                encrypt(value)
+
+            )
+
+        writer.writerow(
+
+            encrypted
+
+        )
 
     sync_git(
 
-    f"Insert row in {table}"
+        f"Insert row in {table}"
 
-)
+    )
 
     return {
 
         "message": "Row inserted"
 
     }
-
 
 def get_rows(db, table):
 
@@ -297,7 +329,17 @@ def get_rows(db, table):
 
         for row in reader:
 
-            rows.append(row)
+            decrypted = {}
+
+            for k, v in row.items():
+
+                decrypted[k] = decrypt(v)
+
+            rows.append(
+
+                decrypted
+
+            )
 
     return rows
 
@@ -338,11 +380,25 @@ def update_row(db, table, row_id, new_data):
 
         for row in reader:
 
-            if row["id"] == str(row_id):
+            if decrypt(row["id"]) == str(row_id):
 
-                row.update(new_data)
+                encrypted = {}
 
-            rows.append(row)
+                for k, v in new_data.items():
+
+                    encrypted[k] = encrypt(v)
+
+                row.update(
+
+                    encrypted
+
+                )
+
+            rows.append(
+
+                row
+
+            )
 
     if not rows:
 
@@ -374,20 +430,23 @@ def update_row(db, table, row_id, new_data):
 
         writer.writeheader()
 
-        writer.writerows(rows)
+        writer.writerows(
+
+            rows
+
+        )
 
     sync_git(
 
-    f"Update row {row_id}"
+        f"Update row {row_id}"
 
-)
+    )
 
     return {
 
         "message": "Row updated"
 
     }
-
 
 def delete_row(db, table, row_id):
 
@@ -425,7 +484,7 @@ def delete_row(db, table, row_id):
 
         for row in reader:
 
-            if row["id"] != str(row_id):
+            if decrypt(row["id"]) != str(row_id):
 
                 rows.append(row)
 
@@ -466,6 +525,8 @@ def delete_row(db, table, row_id):
         "message": "Row deleted"
 
     }
+
+
 def sync_git(message):
 
     subprocess.run(["git", "add", "."])
