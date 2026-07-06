@@ -251,11 +251,7 @@ def create_table(db, table, columns):
 
     save_meta(meta)
 
-    sync_git(
-
-        f"Create table {table}"
-
-    )
+    sync_git("Create table")
 
     return {
 
@@ -325,11 +321,7 @@ def delete_table(db, table):
 
     save_meta(meta)
 
-    sync_git(
-
-        f"Delete table {table}"
-
-    )
+    sync_git("Delete table")
 
     return {
 
@@ -394,11 +386,7 @@ def insert_row(db, table, row):
 
         )
 
-    sync_git(
-
-        f"Insert row in {table}"
-
-    )
+    sync_git("Insert row")
 
     return {
 
