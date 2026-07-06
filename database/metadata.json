@@ -1,6 +1,8 @@
 {
     "database2": {
         "encrypted": "ffe805343da2060570defbb9da94580248377afe6b4179a88f411da683bc9c0a",
-        "tables": {}
+        "tables": {
+            "clients": "8f4d9088121acfab37f4a5875ef93c8a89e1489f1fc3b4367a1ce950a44f23e8"
+        }
     }
 }
