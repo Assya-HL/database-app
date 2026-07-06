@@ -8,7 +8,8 @@
     "database1": {
         "encrypted": "acad7c1c7504df2f2f7a112e1a782f8bcd2c43b900400140fa466b41fcacfb0b",
         "tables": {
-            "etudiants": "f37131323da89c3147d26f6c6ed383db209b76bb0aa01b8732013c486ec51788"
+            "etudiants": "f37131323da89c3147d26f6c6ed383db209b76bb0aa01b8732013c486ec51788",
+            "professeurs": "0e18030c3110634d7841cec583441c651b1b3bd65813e7c4fb3f8861d8bbdf3e"
         }
     }
 }
