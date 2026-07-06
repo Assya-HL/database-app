@@ -451,81 +451,56 @@ def update_row(db, table, row_id, new_data):
 def delete_row(db, table, row_id):
 
     file = os.path.join(
-
         DATABASE_DIR,
-
         db,
-
         f"{table}.csv"
-
     )
 
     if not os.path.exists(file):
-
         return {
-
             "message": "Table not found"
-
         }
 
     rows = []
 
     with open(
-
-            file,
-
-            "r",
-
-            encoding="utf-8"
-
+        file,
+        "r",
+        encoding="utf-8"
     ) as f:
 
         reader = csv.DictReader(f)
 
+        headers = reader.fieldnames
+
         for row in reader:
 
-            if decrypt(row["id"]) != str(row_id):
-
+            if row.get("id") != str(row_id):
                 rows.append(row)
 
     with open(
-
-            file,
-
-            "w",
-
-            newline="",
-
-            encoding="utf-8"
-
+        file,
+        "w",
+        newline="",
+        encoding="utf-8"
     ) as f:
 
-        if rows:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=headers
+        )
 
-            writer = csv.DictWriter(
+        writer.writeheader()
 
-                f,
-
-                fieldnames=rows[0].keys()
-
-            )
-
-            writer.writeheader()
-
-            writer.writerows(rows)
+        writer.writerows(rows)
 
     sync_git(
-
-    f"Delete row {row_id}"
-
-)
+        f"Delete row {row_id}"
+    )
 
     return {
-
         "message": "Row deleted"
-
     }
-
 
 def sync_git(message):
 
